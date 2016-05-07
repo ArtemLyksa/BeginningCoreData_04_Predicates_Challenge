@@ -50,19 +50,18 @@ class DevicesTableViewController: UITableViewController {
         reloadData()
     }
     
-    func reloadData(deviceTypeFilter: String? = nil) {
+    func reloadData(predicate: NSPredicate? = nil) {
         if let selectedPerson = selectedPerson {
             if let personDevices = selectedPerson.devices.allObjects as? [Device] {
                 devices = personDevices
             }
         } else {
             let fetchRequest = NSFetchRequest(entityName: "Device")
-            
-            if let deviceTypeFilter = deviceTypeFilter {
-                let filterPredicate = NSPredicate(format: "deviceType =[c] %@", deviceTypeFilter)
-                fetchRequest.predicate = filterPredicate
-            }
-            
+            fetchRequest.sortDescriptors = [
+                NSSortDescriptor(key: "deviceType", ascending: true),
+                NSSortDescriptor(key: "name", ascending: true)
+            ]
+            fetchRequest.predicate = predicate
             do {
                 if let results = try managedObjectContext.executeFetchRequest(fetchRequest) as? [Device] {
                     devices = results
@@ -110,10 +109,13 @@ class DevicesTableViewController: UITableViewController {
             self.reloadData()
             })
         sheet.addAction(UIAlertAction(title: "Only Phones", style: .Default) { (action) in
-            self.reloadData("iphone")
+            self.reloadData(NSPredicate(format: "deviceType =[c] 'iphone'"))
             })
         sheet.addAction(UIAlertAction(title: "Only Watches", style: .Default) { (action) in
-            self.reloadData("watch")
+            self.reloadData(NSPredicate(format: "deviceType =[c] 'watch'"))
+            })
+        sheet.addAction(UIAlertAction(title: "Only Owned Devices", style: .Default) { (action) in
+            self.reloadData(NSPredicate(format: "owner != nil"))
             })
         
         presentViewController(sheet, animated: true, completion: nil)
