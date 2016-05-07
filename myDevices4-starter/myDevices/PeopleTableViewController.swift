@@ -47,6 +47,9 @@ class PeopleTableViewController: UITableViewController {
 
   func reloadData() {
     let fetchRequest = NSFetchRequest(entityName: "Person")
+    let sortDecriptor = NSSortDescriptor(key: "name", ascending: true)
+    fetchRequest.sortDescriptors = [sortDecriptor]
+    
 
     do {
       if let results = try managedObjectContext.executeFetchRequest(fetchRequest) as? [Person] {
